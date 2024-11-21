@@ -24,16 +24,16 @@ jobs:
       run: dotnet restore
       
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build ./IPGet/IPGet/IPGet.csproj --c Release --no-restore
       
     - name: Publish
-      run: dotnet publish --configuration Release --no-build -o ./output
+      run: dotnet publish --c Release --no-build -o ./win-x64 -r win-x64 -p:PublishTrimmed=true --self-contained true
       
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
         tag: ${{ github.ref }}
-        files: ./output/*
+        files: ./win-x64/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

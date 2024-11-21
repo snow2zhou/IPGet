@@ -1,0 +1,40 @@
+name: build and publish
+
+on:
+  push:
+      tags:
+          - 'v*.*.*'
+
+env:
+  DOTNET_VERSION: '9.0.x' # The .NET SDK version to use
+
+jobs:
+  build-and-publish:
+
+    name: build-and-publish-windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Install dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Publish
+      run: dotnet publish --configuration Release --no-build -o ./output
+      
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag: ${{ github.ref }}
+        files: ./output/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

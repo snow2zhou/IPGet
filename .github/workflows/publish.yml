@@ -30,7 +30,7 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
-        tag: ${{ github.event.release.tag_name }}
+        tag_name: ${{ github.event.release.tag_name }}
         files: ./win-x64/IPGet.exe
         name: IPGet-win-x64.exe
       env:

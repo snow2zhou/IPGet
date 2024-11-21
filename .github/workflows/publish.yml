@@ -21,13 +21,13 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore  ./IPGet/IPGet/IPGet.csproj
       
     - name: Build
       run: dotnet build ./IPGet/IPGet/IPGet.csproj --c Release --no-restore
       
     - name: Publish
-      run: dotnet publish --c Release --no-build -o ./win-x64 -r win-x64 -p:PublishTrimmed=true --self-contained true
+      run: dotnet publish ./IPGet/IPGet/IPGet.csproj --c Release --no-build -o ./win-x64 -r win-x64 -p:PublishTrimmed=true --self-contained true
       
     - name: Create Release
       id: create_release

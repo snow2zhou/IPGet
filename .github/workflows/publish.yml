@@ -32,7 +32,7 @@ jobs:
       with:
         tag_name: ${{ github.event.release.tag_name }}
         name: Release ${{ github.event.release.tag_name }}
-        files: ./publish/*.exe
+        files: ./publish/IPGet.exe
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

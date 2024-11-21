@@ -20,7 +20,7 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
-    - name: Install dependencies
+    - name: Restore dependencies
       run: dotnet restore  ./IPGet/IPGet/IPGet.csproj
             
     - name: Publish
@@ -30,8 +30,8 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
-        name: Release ${{ github.ref }}
+        tag_name: ${{ github.event.release.tag_name }}
+        name: Release ${{ github.event.release.tag_name }}
         files: ./publish/*.exe
         generate_release_notes: true
       env:

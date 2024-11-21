@@ -24,14 +24,15 @@ jobs:
       run: dotnet restore  ./IPGet/IPGet/IPGet.csproj
             
     - name: Publish
-      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./win-x64 -r win-x64 -p:PublishTrimmed=true --self-contained true
-      
+      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./publish -r win-x64 -p:PublishTrimmed=true --self-contained true
+         
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.event.release.tag_name }}
-        files: ./win-x64/IPGet.exe
-        name: IPGet-win-x64.exe
+        tag_name: ${{ github.ref }}
+        name: Release ${{ github.ref }}
+        files: ./publish/*.exe
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

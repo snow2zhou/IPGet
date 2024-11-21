@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+  deployments: write
+
 env:
   DOTNET_VERSION: '9.0.x' # The .NET SDK version to use
 

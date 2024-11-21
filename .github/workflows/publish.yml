@@ -2,7 +2,8 @@ name: build and publish
 
 on:
   push:
-    branches: [ master ]
+    tags:
+      - 'v*'
 
 env:
   DOTNET_VERSION: '9.0.x' # The .NET SDK version to use
@@ -31,6 +32,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag: ${{ github.ref }}
-        files: ./win-x64/*
+        files: ./win-x64/IPGet.exe
+        name: IPGet-win-x64.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

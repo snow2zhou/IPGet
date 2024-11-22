@@ -90,12 +90,15 @@ jobs:
     - name: Publish x64
       run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./linux-x64 -r linux-x64 -p:PublishTrimmed=true --self-contained true
 
+    - name: List published files
+      run: ls -l ./linux-64
+      
     - name: Rename x64 file
       run: |
           currentDir=$(pwd)
           outputDir="linux-x64"
           oldFileName="IPGet"
-          newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
+          newFileName="IPGet_${{ github.event.release.tag_name }}_$outputDir"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -130,7 +133,7 @@ jobs:
           currentDir=$(pwd)
           outputDir="macos-x64"
           oldFileName="IPGet"
-          newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
+          newFileName="IPGet_${{ github.event.release.tag_name }}_$outputDir"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"

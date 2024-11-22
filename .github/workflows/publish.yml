@@ -10,11 +10,11 @@ env:
   BUILD_CONFIG: 'Release'
 
 jobs:
-  build-and-publish:
+  build-and-publish-windows:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest]
         arch: [x64, x86]
 
     steps:
@@ -30,18 +30,54 @@ jobs:
 
       - name: Publish
         run: |
+          outputDir="./win-${{ matrix.arch }}"
+          dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r win-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true          
+
+      - name: Rename output file
+        run: |
+          currentDir=$PWD.Path
+          outputDir="${{ matrix.os }}-${{ matrix.arch }}"
+          oldFileName="${{ env.APP_NAME }}.exe"
+          newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe"
+
+          absoluteOutputPath="$currentDir/$outputDir"
+          oldFilePath="$absoluteOutputPath/$oldFileName"
+          newFilePath="$absoluteOutputPath/$newFileName"
+
+          if (Test-Path $oldFilePath) {
+              Rename-Item -Path $oldFilePath -NewName $newFilePath
+              Write-Host "File renamed from $oldFileName to $newFileName"
+          } else {
+              Write-Host "File $oldFileName does not exist."
+          }
+
+  build-and-publish-linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        arch: [x64]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore ./IPGet/IPGet/IPGet.csproj
+
+      - name: Publish
+        run: |
           outputDir=""
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            outputDir="./win-${{ matrix.arch }}"
-            dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r win-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
-          elif [ "${{ matrix.os }}" == "ubuntu-latest" ] && [ "${{ matrix.arch }}" == "x64" ]; then
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
             outputDir="./linux-${{ matrix.arch }}"
             dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r linux-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
-          elif [ "${{ matrix.os }}" == "macos-latest" ] && [ "${{ matrix.arch }}" == "x64" ]; then
+          else 
             outputDir="./macos-${{ matrix.arch }}"
-            dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r osx-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
-          else
-            echo "Unsupported OS"
+            dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r osx-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true         
           fi
 
       - name: Rename output file
@@ -49,14 +85,7 @@ jobs:
           currentDir=$(pwd)
           outputDir="${{ matrix.os }}-${{ matrix.arch }}"
           oldFileName="${{ env.APP_NAME }}"
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            oldFileName="${oldFileName}.exe"
-            newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe"
-          elif [ "${{ matrix.arch }}" == "x64" ]; then
-            newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}"
-          else
-            echo "Unsupported OS"
-          fi
+          newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -70,7 +99,7 @@ jobs:
           fi
 
   create-release:
-    needs: build-and-publish
+    needs: [build-and-publish-windows, build-and-publish-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Create Release

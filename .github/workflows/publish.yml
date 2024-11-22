@@ -28,11 +28,17 @@ jobs:
     - name: Rename a file
       shell: pwsh
       run: |
-          $oldFileName = "./win-x64/IPGet.exe"
-          $newFileName = "./win-x64/IPGet-${{ github.event.release.tag_name }}-x64.exe"
+          $currentDir = $PWD.Path
+          $outputDir = "win-x64"
+          $oldFileName = "IPGet.exe"
+          $newFileName = "IPGet-${{ github.event.release.tag_name }}-x64.exe"
+
+          $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
+          $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
+          $newFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $newFileName
           
-          if (Test-Path $oldFileName) {
-              Rename-Item -Path $oldFileName -NewName $newFileName
+          if (Test-Path $oldFilePath) {
+              Rename-Item -Path $oldFilePath -NewName $newFilePath
               Write-Host "File renamed from $oldFileName to $newFileName"
           } else {
               Write-Host "File $oldFileName does not exist."

@@ -42,7 +42,6 @@ jobs:
             dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r osx-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
           else
             echo "Unsupported OS"
-            exit 1
           fi
 
       - name: Rename output file
@@ -53,8 +52,10 @@ jobs:
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             oldFileName="${oldFileName}.exe"
             newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe"
-          else
+          elif && [ "${{ matrix.arch }}" == "x64" ]; then
             newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}"
+          else
+            echo "Unsupported OS"
           fi
 
           absoluteOutputPath="$currentDir/$outputDir"
@@ -66,7 +67,6 @@ jobs:
               echo "File renamed from $oldFileName to $newFileName"
           else
               echo "File $oldFileName does not exist."
-              exit 1
           fi
 
   create-release:

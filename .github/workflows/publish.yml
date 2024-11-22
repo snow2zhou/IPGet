@@ -38,7 +38,7 @@ jobs:
           $currentDir=$PWD.Path
           $outputDir="${{ matrix.os }}-${{ matrix.arch }}"
           $oldFileName="${{ env.APP_NAME }}.exe"
-          $newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe"
+          $newFileName="${{ env.APP_NAME }}-${{ github.event.release.tag_name }}-windows-${{ matrix.arch }}.exe"
 
           $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
           $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
@@ -58,7 +58,7 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
           files: |
-            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${{ matrix.os }}-${{ matrix.arch }}.exe
+            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}-${{ github.event.release.tag_name }}-windows-${{ matrix.arch }}.exe
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -95,7 +95,11 @@ jobs:
           currentDir=$(pwd)
           outputDir="${{ matrix.os }}-${{ matrix.arch }}"
           oldFileName="${{ env.APP_NAME }}"
-          newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}"
+          newFileName=""          
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            newFileName="${{ env.APP_NAME }}-${{ github.event.release.tag_name }}-linux-${{ matrix.arch }}"
+          else
+            newFileName="${{ env.APP_NAME }}-${{ github.event.release.tag_name }}-macos-${{ matrix.arch }}"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -115,7 +119,8 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
           files: |          
-            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${{ matrix.os }}-${{ matrix.arch }}
+            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}-${{ github.event.release.tag_name }}-linux-${{ matrix.arch }}            
+            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}-${{ github.event.release.tag_name }}-macos-${{ matrix.arch }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

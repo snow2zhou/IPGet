@@ -30,7 +30,7 @@ jobs:
 
       - name: Publish
         run: |
-          $outputDir="./win-${{ matrix.arch }}"
+          $outputDir="${{ matrix.os }}-${{ matrix.arch }}"
           dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r win-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true          
 
       - name: Rename output file
@@ -73,7 +73,7 @@ jobs:
         run: |
           outputDir=""
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            outputDir="./linux-${{ matrix.arch }}"
+            outputDir="${{ matrix.os }}-${{ matrix.arch }}"
             dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r linux-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
           else 
             outputDir="./macos-${{ matrix.arch }}"
@@ -109,10 +109,10 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
           files: |
-            ./win-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_win-x64.exe
-            ./win-x86/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_win-x86.exe
-            ./linux-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_linux-x64
-            ./macos-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_macos-x64
+            ./windows-latest-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_win-x64.exe
+            ./windows-latest-x86/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_win-x86.exe
+            ./ubuntu-latest-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_linux-x64
+            ./macos-latest-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_macos-x64
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

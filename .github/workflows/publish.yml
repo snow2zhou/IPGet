@@ -50,6 +50,18 @@ jobs:
           } else {
               Write-Host "File $oldFileName does not exist."
           }
+          
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          name: Release ${{ github.event.release.tag_name }}
+          files: |
+            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-publish-linux:
     runs-on: ${{ matrix.os }}
@@ -71,12 +83,10 @@ jobs:
 
       - name: Publish
         run: |
-          outputDir=""
+          outputDir="${{ matrix.os }}-${{ matrix.arch }}"
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            outputDir="${{ matrix.os }}-${{ matrix.arch }}"
             dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r linux-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
-          else 
-            outputDir="./macos-${{ matrix.arch }}"
+          else
             dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r osx-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true         
           fi
 
@@ -97,22 +107,15 @@ jobs:
           else
               echo "File $oldFileName does not exist."
           fi
-
-  create-release:
-    needs: [build-and-publish-windows, build-and-publish-linux]
-    runs-on: ubuntu-latest
-    steps:
+          
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
-          files: |
-            ./windows-latest-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_win-x64.exe
-            ./windows-latest-x86/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_win-x86.exe
-            ./ubuntu-latest-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_linux-x64
-            ./macos-latest-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_macos-x64
+          files: |          
+            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

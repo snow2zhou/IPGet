@@ -34,15 +34,15 @@ jobs:
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             outputDir="./win-${{ matrix.arch }}"
             dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r win-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
+          elif [ "${{ matrix.os }}" == "ubuntu-latest" ] && [ "${{ matrix.arch }}" == "x64" ]; then
+            outputDir="./linux-${{ matrix.arch }}"
+            dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r linux-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
+          elif [ "${{ matrix.os }}" == "macos-latest" ] && [ "${{ matrix.arch }}" == "x64" ]; then
+            outputDir="./macos-${{ matrix.arch }}"
+            dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r osx-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
           else
-            if [ "${{ matrix.arch }}" == "x64" ]; then
-              outputDir="./${{ matrix.os }}-${{ matrix.arch }}"
-              if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-                dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r linux-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
-              else
-                dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r osx-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
-              fi
-            fi
+            echo "Unsupported OS"
+            exit 1
           fi
 
       - name: Rename output file
@@ -66,6 +66,7 @@ jobs:
               echo "File renamed from $oldFileName to $newFileName"
           else
               echo "File $oldFileName does not exist."
+              exit 1
           fi
 
   create-release:

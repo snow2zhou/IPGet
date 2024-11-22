@@ -41,7 +41,7 @@ jobs:
           $currentDir = $PWD.Path
           $outputDir = "win-x64"
           $oldFileName = "IPGet.exe"
-          $newFileName = "IPGet-${{ github.event.release.tag_name }}-x64.exe"
+          $newFileName = "IPGet-$outputDir-${{ github.event.release.tag_name }}.exe"
 
           $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
           $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
@@ -60,7 +60,7 @@ jobs:
           $currentDir = $PWD.Path
           $outputDir = "win-x86"
           $oldFileName = "IPGet.exe"
-          $newFileName = "IPGet-${{ github.event.release.tag_name }}-x86.exe"
+          $newFileName = "IPGet-$outputDir-${{ github.event.release.tag_name }}.exe"
 
           $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
           $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
@@ -98,7 +98,7 @@ jobs:
           currentDir=$(pwd)
           outputDir="linux-x64"
           oldFileName="IPGet"
-          newFileName="IPGet-${{ github.event.release.tag_name }}-x64"
+          newFileName="IPGet-$outputDir-${{ github.event.release.tag_name }}"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -116,7 +116,63 @@ jobs:
           currentDir=$(pwd)
           outputDir="linux-x86"
           oldFileName="IPGet"
-          newFileName="IPGet-${{ github.event.release.tag_name }}-x86"
+          newFileName="IPGet-$outputDir-${{ github.event.release.tag_name }}"
+
+          absoluteOutputPath="$currentDir/$outputDir"
+          oldFilePath="$absoluteOutputPath/$oldFileName"
+          newFilePath="$absoluteOutputPath/$newFileName"
+          
+          if [ -f "$oldFilePath" ]; then
+              mv "$oldFilePath" "$newFilePath"
+              echo "File renamed from $oldFileName to $newFileName"
+          else
+              echo "File $oldFileName does not exist."
+          fi
+
+  build-and-publish-macos:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ./IPGet/IPGet/IPGet.csproj
+
+    - name: Publish x64
+      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./macos-x64 -r osx-x64 -p:PublishTrimmed=true --self-contained true
+
+    - name: Publish x86
+      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./macos-x86 -r osx-x86 -p:PublishTrimmed=true --self-contained true
+
+    - name: Rename x64 file
+      run: |
+          currentDir=$(pwd)
+          outputDir="macos-x64"
+          oldFileName="IPGet"
+          newFileName="IPGet-$outputDir-${{ github.event.release.tag_name }}"
+
+          absoluteOutputPath="$currentDir/$outputDir"
+          oldFilePath="$absoluteOutputPath/$oldFileName"
+          newFilePath="$absoluteOutputPath/$newFileName"
+          
+          if [ -f "$oldFilePath" ]; then
+              mv "$oldFilePath" "$newFilePath"
+              echo "File renamed from $oldFileName to $newFileName"
+          else
+              echo "File $oldFileName does not exist."
+          fi
+
+    - name: Rename x86 file
+      run: |
+          currentDir=$(pwd)
+          outputDir="macos-x86"
+          oldFileName="IPGet"
+          newFileName="IPGet-$outputDir-${{ github.event.release.tag_name }}"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -130,7 +186,7 @@ jobs:
           fi
          
   create-release:
-      needs: [build-and-publish-windows, build-and-publish-linux]
+      needs: [build-and-publish-windows, build-and-publish-linux, build-and-publish-macos]
       runs-on: ubuntu-latest
       steps:
       - name: Create Release
@@ -140,10 +196,12 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
           files: |
-            ./win-x64/IPGet-${{ github.event.release.tag_name }}-x64.exe
-            ./win-x86/IPGet-${{ github.event.release.tag_name }}-x86.exe
-            ./linux-x64/IPGet-${{ github.event.release.tag_name }}-x64
-            ./linux-x86/IPGet-${{ github.event.release.tag_name }}-x86
+            ./win-x64/IPGet-win-x64-${{ github.event.release.tag_name }}.exe
+            ./win-x86/IPGet-win-x86-${{ github.event.release.tag_name }}.exe
+            ./linux-x64/IPGet-linux-x64-${{ github.event.release.tag_name }}
+            ./linux-x86/IPGet-linux-x86-${{ github.event.release.tag_name }}          
+            ./macos-x64/IPGet-macos-x64-${{ github.event.release.tag_name }}
+            ./macos-x86/IPGet-macos-x86-${{ github.event.release.tag_name }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

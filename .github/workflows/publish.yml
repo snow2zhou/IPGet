@@ -30,19 +30,19 @@ jobs:
 
       - name: Publish
         run: |
-          outputDir="./win-${{ matrix.arch }}"
+          $outputDir="./win-${{ matrix.arch }}"
           dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r win-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true          
 
       - name: Rename output file
         run: |
-          currentDir=$PWD.Path
-          outputDir="${{ matrix.os }}-${{ matrix.arch }}"
-          oldFileName="${{ env.APP_NAME }}.exe"
-          newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe"
+          $currentDir=$PWD.Path
+          $outputDir="${{ matrix.os }}-${{ matrix.arch }}"
+          $oldFileName="${{ env.APP_NAME }}.exe"
+          $newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe"
 
-          absoluteOutputPath="$currentDir/$outputDir"
-          oldFilePath="$absoluteOutputPath/$oldFileName"
-          newFilePath="$absoluteOutputPath/$newFileName"
+          $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
+          $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
+          $newFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $newFileName
 
           if (Test-Path $oldFilePath) {
               Rename-Item -Path $oldFilePath -NewName $newFilePath

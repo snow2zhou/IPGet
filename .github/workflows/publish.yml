@@ -3,11 +3,6 @@ name: Release
 on:
   release:
     types: [published]
-
-permissions:
-  contents: read
-  deployments: write
-
 env:
   DOTNET_VERSION: '9.0.x' # The .NET SDK version to use
 
@@ -28,7 +23,20 @@ jobs:
       run: dotnet restore  ./IPGet/IPGet/IPGet.csproj
             
     - name: Publish
-      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./publish -r win-x64 -p:PublishTrimmed=true --self-contained true
+      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./win-x64 -r win-x64 -p:PublishTrimmed=true --self-contained true
+
+    - name: Rename a file
+      shell: pwsh
+      run: |
+          $oldFileName = "./win-x64/IPGet.exe"
+          $newFileName = "./win-x64/IPGet-${{ github.event.release.tag_name }}-x64.exe"
+          
+          if (Test-Path $oldFileName) {
+              Rename-Item -Path $oldFileName -NewName $newFileName
+              Write-Host "File renamed from $oldFileName to $newFileName"
+          } else {
+              Write-Host "File $oldFileName does not exist."
+          }
          
     - name: Create Release
       id: create_release
@@ -36,7 +44,7 @@ jobs:
       with:
         tag_name: ${{ github.event.release.tag_name }}
         name: Release ${{ github.event.release.tag_name }}
-        files: ./publish/IPGet.exe
+        files: ./win-x64/IPGet-${{ github.event.release.tag_name }}-x64.exe
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

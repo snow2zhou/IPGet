@@ -41,7 +41,7 @@ jobs:
           $currentDir = $PWD.Path
           $outputDir = "win-x64"
           $oldFileName = "IPGet.exe"
-          $newFileName = "IPGet-$outputDir-${{ github.event.release.tag_name }}.exe"
+          $newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir.exe"
 
           $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
           $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
@@ -60,7 +60,7 @@ jobs:
           $currentDir = $PWD.Path
           $outputDir = "win-x86"
           $oldFileName = "IPGet.exe"
-          $newFileName = "IPGet-$outputDir-${{ github.event.release.tag_name }}.exe"
+          $newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir.exe"
 
           $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
           $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
@@ -98,7 +98,7 @@ jobs:
           currentDir=$(pwd)
           outputDir="linux-x64"
           oldFileName="IPGet"
-          newFileName="IPGet-$outputDir-${{ github.event.release.tag_name }}"
+          newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -116,7 +116,7 @@ jobs:
           currentDir=$(pwd)
           outputDir="linux-x86"
           oldFileName="IPGet"
-          newFileName="IPGet-$outputDir-${{ github.event.release.tag_name }}"
+          newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -154,7 +154,7 @@ jobs:
           currentDir=$(pwd)
           outputDir="macos-x64"
           oldFileName="IPGet"
-          newFileName="IPGet-$outputDir-${{ github.event.release.tag_name }}"
+          newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -172,7 +172,7 @@ jobs:
           currentDir=$(pwd)
           outputDir="macos-x86"
           oldFileName="IPGet"
-          newFileName="IPGet-$outputDir-${{ github.event.release.tag_name }}"
+          newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -196,12 +196,12 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
           files: |
-            ./win-x64/IPGet-win-x64-${{ github.event.release.tag_name }}.exe
-            ./win-x86/IPGet-win-x86-${{ github.event.release.tag_name }}.exe
-            ./linux-x64/IPGet-linux-x64-${{ github.event.release.tag_name }}
-            ./linux-x86/IPGet-linux-x86-${{ github.event.release.tag_name }}          
-            ./macos-x64/IPGet-macos-x64-${{ github.event.release.tag_name }}
-            ./macos-x86/IPGet-macos-x86-${{ github.event.release.tag_name }}
+            ./win-x64/IPGet_${{ github.event.release.tag_name }}_win-x64.exe
+            ./win-x86/IPGet_${{ github.event.release.tag_name }}_win-x86.exe
+            ./linux-x64/IPGet_${{ github.event.release.tag_name }}_linux-x64
+            ./linux-x86/IPGet_${{ github.event.release.tag_name }} _linux-x86  
+            ./macos-x64/IPGet_${{ github.event.release.tag_name }}_macos-x64
+            ./macos-x86/IPGet_${{ github.event.release.tag_name }}_macos-x86
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

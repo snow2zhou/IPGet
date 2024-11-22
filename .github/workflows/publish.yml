@@ -3,99 +3,59 @@ name: Release
 on:
   release:
     types: [published]
+
 env:
-  DOTNET_VERSION: '9.0.x' # The .NET SDK version to use
+  DOTNET_VERSION: '9.0.x'
+  APP_NAME: 'IPGet'
+  BUILD_CONFIG: 'Release'
 
 jobs:
-  build-and-publish-windows:
-    runs-on: windows-latest
+  build-and-publish:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        arch: [x64, x86]
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: actions/checkout@v3
 
-    - name: Cache NuGet packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('./IPGet/IPGet/IPGet.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Restore dependencies
-      run: dotnet restore  ./IPGet/IPGet/IPGet.csproj
-            
-    - name: Publish x64
-      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./win-x64 -r win-x64 -p:PublishTrimmed=true --self-contained true
-      
-    - name: Publish x86
-      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./win-x86 -r win-x86 -p:PublishTrimmed=true --self-contained true
-      
-    - name: Rename x64 file
-      shell: pwsh
-      run: |
-          $currentDir = $PWD.Path
-          $outputDir = "win-x64"
-          $oldFileName = "IPGet.exe"
-          $newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir.exe"
+      - name: Restore dependencies
+        run: dotnet restore ./IPGet/IPGet/IPGet.csproj
 
-          $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
-          $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
-          $newFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $newFileName
-          
-          if (Test-Path $oldFilePath) {
-              Rename-Item -Path $oldFilePath -NewName $newFilePath
-              Write-Host "File renamed from $oldFileName to $newFileName"
-          } else {
-              Write-Host "File $oldFileName does not exist."
-          }
-          
-    - name: Rename x86 file
-      shell: pwsh
-      run: |
-          $currentDir = $PWD.Path
-          $outputDir = "win-x86"
-          $oldFileName = "IPGet.exe"
-          $newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir.exe"
+      - name: Publish
+        run: |
+          outputDir=""
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            outputDir="./win-${{ matrix.arch }}"
+            dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r win-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
+          else
+            if [ "${{ matrix.arch }}" == "x64" ]; then
+              outputDir="./${{ matrix.os }}-${{ matrix.arch }}"
+              if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+                dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r linux-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
+              else
+                dotnet publish ./IPGet/IPGet/IPGet.csproj -c ${{ env.BUILD_CONFIG }} --no-restore -o $outputDir -r osx-${{ matrix.arch }} -p:PublishTrimmed=true --self-contained true
+              fi
+            fi
+          fi
 
-          $absoluteOutputPath = Join-Path -Path $currentDir -ChildPath $outputDir
-          $oldFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $oldFileName
-          $newFilePath = Join-Path -Path $absoluteOutputPath -ChildPath $newFileName
-          
-          if (Test-Path $oldFilePath) {
-              Rename-Item -Path $oldFilePath -NewName $newFilePath
-              Write-Host "File renamed from $oldFileName to $newFileName"
-          } else {
-              Write-Host "File $oldFileName does not exist."
-          }
-
-  build-and-publish-linux:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        
-    - name: Restore dependencies
-      run: dotnet restore ./IPGet/IPGet/IPGet.csproj
-            
-    - name: Publish x64
-      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./linux-x64 -r linux-x64 -p:PublishTrimmed=true --self-contained true
-      
-    - name: Rename x64 file
-      run: |
+      - name: Rename output file
+        run: |
           currentDir=$(pwd)
-          outputDir="linux-x64"
-          oldFileName="IPGet"
-          newFileName="IPGet_${{ github.event.release.tag_name }}_$outputDir"
+          outputDir="${{ matrix.os }}-${{ matrix.arch }}"
+          oldFileName="${{ env.APP_NAME }}"
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            oldFileName="${oldFileName}.exe"
+            newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe"
+          else
+            newFileName="${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}"
+          fi
 
           absoluteOutputPath="$currentDir/$outputDir"
           oldFilePath="$absoluteOutputPath/$oldFileName"
@@ -108,45 +68,10 @@ jobs:
               echo "File $oldFileName does not exist."
           fi
 
-  build-and-publish-macos:
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Restore dependencies
-      run: dotnet restore ./IPGet/IPGet/IPGet.csproj
-
-    - name: Publish x64
-      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./macos-x64 -r osx-x64 -p:PublishTrimmed=true --self-contained true
-
-    - name: Rename x64 file
-      run: |
-          currentDir=$(pwd)
-          outputDir="macos-x64"
-          oldFileName="IPGet"
-          newFileName="IPGet_${{ github.event.release.tag_name }}_$outputDir"
-
-          absoluteOutputPath="$currentDir/$outputDir"
-          oldFilePath="$absoluteOutputPath/$oldFileName"
-          newFilePath="$absoluteOutputPath/$newFileName"
-          
-          if [ -f "$oldFilePath" ]; then
-              mv "$oldFilePath" "$newFilePath"
-              echo "File renamed from $oldFileName to $newFileName"
-          else
-              echo "File $oldFileName does not exist."
-          fi
-         
   create-release:
-      needs: [build-and-publish-windows, build-and-publish-linux, build-and-publish-macos]
-      runs-on: ubuntu-latest
-      steps:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    steps:
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -154,10 +79,10 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
           files: |
-            ./win-x64/IPGet_${{ github.event.release.tag_name }}_win-x64.exe
-            ./win-x86/IPGet_${{ github.event.release.tag_name }}_win-x86.exe
-            ./linux-x64/IPGet_${{ github.event.release.tag_name }}_linux-x64
-            ./macos-x64/IPGet_${{ github.event.release.tag_name }}_macos-x64
+            ./win-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_win-x64.exe
+            ./win-x86/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_win-x86.exe
+            ./linux-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_linux-x64
+            ./macos-x64/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_macos-x64
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

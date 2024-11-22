@@ -90,31 +90,10 @@ jobs:
     - name: Publish x64
       run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./linux-x64 -r linux-x64 -p:PublishTrimmed=true --self-contained true
 
-    - name: Publish x86
-      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./linux-x86 -r linux-x86 -p:PublishTrimmed=true --self-contained true
-
     - name: Rename x64 file
       run: |
           currentDir=$(pwd)
           outputDir="linux-x64"
-          oldFileName="IPGet"
-          newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
-
-          absoluteOutputPath="$currentDir/$outputDir"
-          oldFilePath="$absoluteOutputPath/$oldFileName"
-          newFilePath="$absoluteOutputPath/$newFileName"
-          
-          if [ -f "$oldFilePath" ]; then
-              mv "$oldFilePath" "$newFilePath"
-              echo "File renamed from $oldFileName to $newFileName"
-          else
-              echo "File $oldFileName does not exist."
-          fi
-
-    - name: Rename x86 file
-      run: |
-          currentDir=$(pwd)
-          outputDir="linux-x86"
           oldFileName="IPGet"
           newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
 
@@ -146,31 +125,10 @@ jobs:
     - name: Publish x64
       run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./macos-x64 -r osx-x64 -p:PublishTrimmed=true --self-contained true
 
-    - name: Publish x86
-      run: dotnet publish ./IPGet/IPGet/IPGet.csproj -c Release --no-restore -o ./macos-x86 -r osx-x86 -p:PublishTrimmed=true --self-contained true
-
     - name: Rename x64 file
       run: |
           currentDir=$(pwd)
           outputDir="macos-x64"
-          oldFileName="IPGet"
-          newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
-
-          absoluteOutputPath="$currentDir/$outputDir"
-          oldFilePath="$absoluteOutputPath/$oldFileName"
-          newFilePath="$absoluteOutputPath/$newFileName"
-          
-          if [ -f "$oldFilePath" ]; then
-              mv "$oldFilePath" "$newFilePath"
-              echo "File renamed from $oldFileName to $newFileName"
-          else
-              echo "File $oldFileName does not exist."
-          fi
-
-    - name: Rename x86 file
-      run: |
-          currentDir=$(pwd)
-          outputDir="macos-x86"
           oldFileName="IPGet"
           newFileName = "IPGet_${{ github.event.release.tag_name }}_$outputDir"
 
@@ -199,9 +157,7 @@ jobs:
             ./win-x64/IPGet_${{ github.event.release.tag_name }}_win-x64.exe
             ./win-x86/IPGet_${{ github.event.release.tag_name }}_win-x86.exe
             ./linux-x64/IPGet_${{ github.event.release.tag_name }}_linux-x64
-            ./linux-x86/IPGet_${{ github.event.release.tag_name }} _linux-x86  
             ./macos-x64/IPGet_${{ github.event.release.tag_name }}_macos-x64
-            ./macos-x86/IPGet_${{ github.event.release.tag_name }}_macos-x86
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

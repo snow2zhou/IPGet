@@ -58,7 +58,7 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
           files: |
-            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}.exe
+            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${{ matrix.os }}-${{ matrix.arch }}.exe
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -115,7 +115,7 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           name: Release ${{ github.event.release.tag_name }}
           files: |          
-            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${outputDir}
+            ${{ matrix.os }}-${{ matrix.arch }}/${{ env.APP_NAME }}_${{ github.event.release.tag_name }}_${{ matrix.os }}-${{ matrix.arch }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

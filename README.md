@@ -8,7 +8,7 @@
 
 ## 使用方法
 
-- 从 [Releases](https://github.com/snow2zhou/IPGet/releases)) 下载并解压 IPGet
+- 从 [Releases](https://github.com/snow2zhou/IPGet/releases) 下载并解压 IPGet
 
 - 运行程序
   - 初次运行，会生成 appsettings.json 配置文件。
@@ -59,7 +59,8 @@
     "AuthorizationCode": "这里填163账号对应的授权码", //授权码
     "EmailSender": "IP地址变更", //Email邮件发送名
     "Emails": [ //需要通知传达的邮箱
-        "123456789@163.com"
+        "123456789@163.com",
+        "987654321@163.com"
     ]
   },
 ```
@@ -102,12 +103,12 @@
   }
 ```
 
-    - 修改公网 IPv4 获取接口
-        - 设置 IPGetOptions-> GetIPv4API 的参数
-    - 修改公网 IPv6 获取接口
-        - 设置 IPGetOptions-> GetIPv6API 的参数
-    - 修改公网IP获取间隔时间（分钟）
-        - 设置 IPGetOptions-> IntervalTime 的参数
+- 修改公网 IPv4 获取接口
+  - 设置 IPGetOptions-> GetIPv4API 的参数
+- 修改公网 IPv6 获取接口
+  - 设置 IPGetOptions-> GetIPv6API 的参数
+- 修改公网IP获取间隔时间（分钟）
+  - 设置 IPGetOptions-> IntervalTime 的参数
 
 ## 可获取公网IP的公益API接口
 
